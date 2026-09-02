@@ -1,77 +1,63 @@
-name: Initialize Fresh Expo Project
+name: Initialize Compose Multiplatform Project
 
 on:
   workflow_dispatch:
     inputs:
-      template:
-        description: 'Expo Template (e.g., blank, tabs, blank-typescript)'
+      project_name:
+        description: 'Project Name'
         required: false
-        default: 'blank'
-      commit_message:
-        description: 'Commit message'
+        default: 'CMPApp'
+      package_id:
+        description: 'Package ID (e.g. com.example.cmpapp)'
         required: false
-        default: 'chore: reinitialize repository with fresh Expo project'
+        default: 'com.example.cmpapp'
 
 permissions:
   contents: write
 
 jobs:
-  reinit-repo:
+  init-cmp:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Create New Expo Project in Temp Folder
+      - name: Download & Extract Template from JetBrains Wizard API
         run: |
-          npx create-expo-app@latest temp-expo-app --template ${{ github.event.inputs.template }} --no-install
+          mkdir temp-cmp
+          # Fetch a standard Android + iOS Compose Multiplatform template
+          curl -X POST "https://kmp.jetbrains.com/api/wizard" \
+            -H "Content-Type: application/json" \
+            -d "{\"projectName\":\"${{ github.event.inputs.project_name }}\",\"packageId\":\"${{ github.event.inputs.package_id }}\",\"platforms\":[\"ANDROID\",\"IOS\"],\"uiFramework\":\"COMPOSE\"}" \
+            --output template.zip
 
-      - name: Remove Old Repository Files
+          unzip -q template.zip -d temp-cmp
+
+      - name: Clear Old Files & Move CMP Project to Root
         run: |
-          # Enable dotglob to match hidden files (e.g., .eslintrc, .env)
           shopt -s dotglob
-          
-          # Delete everything in repo root except .git, .github, and temp-expo-app
           for item in *; do
-            if [[ "$item" != ".git" && "$item" != ".github" && "$item" != "temp-expo-app" ]]; then
+            if [[ "$item" != ".git" && "$item" != ".github" && "$item" != "temp-cmp" ]]; then
               rm -rf "$item"
             fi
           done
-          
+
+          # Move files from extracted nested root folder to repository root
+          EXTRACTED_DIR=$(find temp-cmp -mindepth 1 -maxdepth 1 -type d)
+          mv "$EXTRACTED_DIR"/* .
+          rm -rf temp-cmp template.zip
           shopt -u dotglob
 
-      - name: Move Expo Files to Root & Generate package-lock.json
-        run: |
-          # Move all files (including hidden ones) from temp folder to root
-          shopt -s dotglob
-          mv temp-expo-app/* .
-          shopt -u dotglob
-          rm -rf temp-expo-app
-
-          # Run npm install to generate/update package-lock.json
-          npm install --package-lock-only
-
-      - name: Commit and Push Changes
+      - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
           git add -A
-          
-          # Only commit and push if there are changes
           if ! git diff-index --quiet HEAD; then
-            git commit -m "${{ github.event.inputs.commit_message }}"
+            git commit -m "chore: initialize Compose Multiplatform project"
             git push origin ${{ github.ref_name }}
-          else
-            echo "No changes to commit."
           fi
           
