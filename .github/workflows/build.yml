@@ -4,12 +4,10 @@ on: workflow_dispatch
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Install and Run Fastfetch
-        shell: pwsh
         run: |
-          winget install Fastfetch-cli.Fastfetch --accept-source-agreements --accept-package-agreements --disable-interactivity
-          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          sudo apt update -y
+          sudo apt install fastfetch -y
           fastfetch
-          
