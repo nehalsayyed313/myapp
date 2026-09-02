@@ -4,9 +4,9 @@ on: workflow_dispatch
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: windows-latest
     steps:
       - name: running 
         run: |
-           brew install fastfetch -y
+           winget install fastfetch -y
            fastfetch
