@@ -6,7 +6,10 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: running 
+      - name: Install and Run Neofetch
+        shell: pwsh
         run: |
-           winget install neofetch -y
-           neofetch
+          iwr -useb get.scoop.it | iex
+          scoop install neofetch
+          neofetch
+          
