@@ -6,8 +6,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Install and Run Fastfetch
+      - name: Run Neofetch
         run: |
-          sudo apt update -y
-          sudo apt install fastfetch -y
-          fastfetch
+          sudo apt-get update && sudo apt-get install -y neofetch
+          neofetch
+          
