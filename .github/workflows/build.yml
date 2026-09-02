@@ -17,5 +17,8 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn clean package
+        run: |
+          git clone https://github.com/jasonwinning/hypernomicon.git
+          cd hypernomicon
+          mvn clean package
         
