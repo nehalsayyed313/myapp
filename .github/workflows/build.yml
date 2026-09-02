@@ -8,5 +8,5 @@ jobs:
     steps:
       - name: running 
         run: |
-           brew install neofetch -y
-           neofetch
+           brew install fastfetch -y
+           fastfetch
