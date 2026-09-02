@@ -6,10 +6,10 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Install and Run Neofetch
+      - name: Install and Run Fastfetch
         shell: pwsh
         run: |
-          iwr -useb get.scoop.it | iex
-          scoop install neofetch
-          neofetch
+          winget install Fastfetch-cli.Fastfetch --accept-source-agreements --accept-package-agreements --disable-interactivity
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          fastfetch
           
